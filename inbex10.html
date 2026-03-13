@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Tarjumon Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; padding: 20px; }
+        .main-wrapper { display: flex; gap: 20px; align-items: flex-start; }
+        .container { background: rgba(3, 32, 81, 0.9); padding: 25px; border-radius: 20px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .history-sidebar { background: #1e293b; padding: 15px; border-radius: 20px; width: 200px; height: 450px; overflow-y: auto; font-size: 13px; border: 1px solid #334155; }
+        .history-item { padding: 8px; border-bottom: 1px solid #334155; color: #94a3b8; cursor: pointer; }
+        .history-item:hover { color: #fff; }
+        textarea { width: 100%; height: 80px; background: #283c5e; border: 1px solid #475569; border-radius: 10px; color: white; padding: 10px; box-sizing: border-box; margin: 10px 0; }
+        select { width: 100%; padding: 10px; background: #24c8ff; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: transform 0.1s; }
+        button:active { transform: scale(0.96); }
+        .speak-btn { background: #0062ff; color: white; }
+        .translate-btn { background: #ffc106; color: black; }
+        .mic-btn { background: #eb0000; color: white; }
+        
+        /* Rasm tugmasi uchun yangi uslub */
+        .img-btn { background: #10b981; color: white; width: 48%; display: inline-block; margin-right: 2%; font-size: 12px; padding: 10px; }
+        .mic-btn-small { width: 48%; display: inline-block; font-size: 12px; padding: 10px; }
+        .btn-row { display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="history-sidebar">
+        <h4 style="margin-top:0">Таърих (Тоҷики)</h4>
+    </div>
+
+    <div class="container">
+        <h2>Тарҷумон</h2>
+        <select id="interfaceLang" onchange="changeInterfaceLang()" style="width: 150px; margin-bottom: 20px;">
+            <option value="tg">Тоҷикӣ</option>
+            <option value="uz">O'zbekcha</option>
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+        </select>    
+        <select id="lang1">
+            <option value="uz-UZ">O'zbek</option>
+            <option value="tg-TJ">Tojik (Тоҷики)</option>
+            <option value="en-US">English</option>
+            <option value="ru-RU">Русский</option>
+            <option value="ko">한국어 (Hangugeo)</option>
+            <option value="de">Deutsch</option>
+            <option value="ar">اللغة العربية</option>
+            <option value="fr">Français</option>
+            <option value="it">Italiano</option>
+            <option value="fa">فارسی (Fārsi)</option>
+            <option value="pt">Português</option>
+            <option value="ja">日本語 (Nihongo)</option>
+            <option value="hi">हिन्दी (Hindī)</option>
+            <option value="zh-CN">简体中文</option>
+        </select>
+        <textarea id="text1" placeholder="Матнро дохил кунед..."></textarea>
+        <button class="speak-btn" onclick="speak('text1', 'lang1', this)">🔊 Шунидан</button>
+        
+        <div class="btn-row">
+            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="processImage(this)">
+            <button class="img-btn" onclick="document.getElementById('imageInput').click()">🖼️ Расм</button>
+            <button class="mic-btn mic-btn-small" onclick="listen('text1', 'lang1', this)">🎤 Микрофон</button>
+        </div>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #0c2e58;">
+
+        <button class="translate-btn" onclick="translateText(this)">Тарҷума кардан ⇄</button>
+        <select id="lang2">
+            <option value="en-US">English</option>
+            <option value="uz-UZ">O'zbek</option>
+            <option value="ru">Русский</option>
+            <option value="tg">Тоҷикӣ</option>
+            <option value="ko">한국어 (Hangugeo)</option>
+            <option value="de">Deutsch</option>
+            <option value="ar">اللغة العربية</option>
+            <option value="fr">Français</option>
+            <option value="it">Italiano</option>
+            <option value="fa">فارسی (Fārsi)</option>
+            <option value="pt">Português</option>
+            <option value="ja">日本語 (Nihongo)</option>
+            <option value="hi">हिन्दी (Hindī)</option>
+            <option value="zh-CN">简体中文</option>
+        </select>
+        <textarea id="text2" placeholder="Тарҷума..."></textarea>
+        <button class="speak-btn" onclick="speak('text2', 'lang2', this)">🔊 Шунидан</button>
+    </div>
+</div>
+
+<script>
+    // RASM ORQALI TARJIMA QILISH FUNKSIYASI
+    async function processImage(input) {
+        if (!input.files || !input.files[0]) return;
+        const btn = document.querySelector('.img-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳...";
+        
+        try {
+            const result = await Tesseract.recognize(input.files[0], 'eng+rus+uzb');
+            document.getElementById('text1').value = result.data.text;
+            btn.innerText = "✅ Tayyor";
+            setTimeout(() => btn.innerText = originalText, 2000);
+        } catch (e) {
+            btn.innerText = "❌ Xato";
+            setTimeout(() => btn.innerText = originalText, 2000);
+        }
+    }
+
+    // TARIX FUNKSIYASI
+    function addHistory(original, translated) {
+        const historySidebar = document.querySelector('.history-sidebar');
+        const newItem = document.createElement('div');
+        newItem.className = 'history-item';
+        newItem.innerText = `${original} -> ${translated}`;
+        historySidebar.prepend(newItem);
+    }
+
+    function speak(textId, langId, btn) {
+        btn.innerText = "Хонда истодааст...";
+        window.speechSynthesis.cancel();
+        const text = document.getElementById(textId).value;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = document.getElementById(langId).value;
+        utterance.onend = () => btn.innerText = "🔊 Шунидан";
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function listen(textId, langId, btn) {
+        btn.style.background = "#f87171";
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = document.getElementById(langId).value;
+        rec.onresult = (e) => {
+            document.getElementById(textId).value = e.results[0][0].transcript;
+            btn.style.background = "#eb0000";
+        };
+        rec.start();
+    }
+
+    async function translateText(btn) {
+        const text1 = document.getElementById('text1').value;
+        if (!text1) return;
+        btn.innerText = "Тарҷума шуда истодааст...";
+        const from = document.getElementById('lang1').value.split('-')[0];
+        const to = document.getElementById('lang2').value.split('-')[0];
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text1)}&langpair=${from}|${to}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const translatedText = data.responseData.translatedText;
+        document.getElementById('text2').value = translatedText;
+        addHistory(text1, translatedText);
+        btn.innerText = "Тарҷума кардан ⇄";
+    }
+
+    const translations = {
+        tg: { title: "Тарҷумон", history: "Таърих", placeholder1: "Матнро дохил кунед...", placeholder2: "Тарҷума...", btnSpeak: "🔊 Шунидан", btnMic: "🎤 Микрофон", btnTranslate: "Тарҷума кардан ⇄", btnImg: "🖼️ Расм" },
+        uz: { title: "Tarjimon", history: "Tarix", placeholder1: "Matnni kiriting...", placeholder2: "Tarjima...", btnSpeak: "🔊 Eshitish", btnMic: "🎤 Mikrofon", btnTranslate: "Tarjima qilish ⇄", btnImg: "🖼️ Rasm" },
+        ru: { title: "Переводчик", history: "История", placeholder1: "Введите текст...", placeholder2: "Перевод...", btnSpeak: "🔊 Слушать", btnMic: "🎤 Микрофон", btnTranslate: "Перевести ⇄", btnImg: "🖼️ Фото" },
+        en: { title: "Translator", history: "History", placeholder1: "Enter text...", placeholder2: "Translation...", btnSpeak: "🔊 Listen", btnMic: "🎤 Microphone", btnTranslate: "Translate ⇄", btnImg: "🖼️ Image" }
+    };
+
+    function changeInterfaceLang() {
+        const lang = document.getElementById('interfaceLang').value;
+        const t = translations[lang];
+        document.querySelector('h2').innerText = t.title;
+        document.querySelector('.history-sidebar h4').innerText = t.history;
+        document.getElementById('text1').placeholder = t.placeholder1;
+        document.getElementById('text2').placeholder = t.placeholder2;
+        document.querySelectorAll('.speak-btn').forEach(btn => btn.innerText = t.btnSpeak);
+        document.querySelector('.mic-btn').innerText = t.btnMic;
+        document.querySelector('.img-btn').innerText = t.btnImg;
+        document.querySelector('.translate-btn').innerText = t.btnTranslate;
+    }
+</script>
+</body>
+</html>
