@@ -1,177 +1,1317 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="tg">
 <head>
     <meta charset="UTF-8">
-    <title>AI Tarjumon Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevSnippets </title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; padding: 20px; }
-        .main-wrapper { display: flex; gap: 20px; align-items: flex-start; }
-        .container { background: rgba(3, 32, 81, 0.9); padding: 25px; border-radius: 20px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .history-sidebar { background: #1e293b; padding: 15px; border-radius: 20px; width: 200px; height: 450px; overflow-y: auto; font-size: 13px; border: 1px solid #334155; }
-        .history-item { padding: 8px; border-bottom: 1px solid #334155; color: #94a3b8; cursor: pointer; }
-        .history-item:hover { color: #fff; }
-        textarea { width: 100%; height: 80px; background: #283c5e; border: 1px solid #475569; border-radius: 10px; color: white; padding: 10px; box-sizing: border-box; margin: 10px 0; }
-        select { width: 100%; padding: 10px; background: #24c8ff; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: transform 0.1s; }
-        button:active { transform: scale(0.96); }
-        .speak-btn { background: #0062ff; color: white; }
-        .translate-btn { background: #ffc106; color: black; }
-        .mic-btn { background: #eb0000; color: white; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary-blue: #38bdf8;
+            --accent-green: #10b981;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .filter-menu {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px;
+            border-radius: 50px;
+            border: 1px solid #334155;
+        }
+
+        .filter-btn {
+            background: var(--card-bg);
+            color: white;
+            border: 2px solid #334155;
+            padding: 10px 22px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover { border-color: var(--primary-blue); }
+
+        .filter-btn.active {
+            background: var(--primary-blue);
+            color: #000;
+            border-color: var(--primary-blue);
+            transform: scale(1.08);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            display: block; 
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-5px);
+        }
+
+        .visual-box {
+            width: 100%;
+            min-height: 80px;
+            background: #0b1120;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #334155;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .desc-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary-blue);
+            padding-left: 10px;
+            line-height: 1.4;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--primary-blue);
+        } 
+
+        pre {
+            border-radius: 8px !important;
+            margin: 15px 0 !important;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 13px !important;
+        }
+
+        .copy-btn {
+            width: 100%;
+            background: #334155;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .copy-btn:hover { background: #475569; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Rasm tugmasi uchun yangi uslub */
-        .img-btn { background: #10b981; color: white; width: 48%; display: inline-block; margin-right: 2%; font-size: 12px; padding: 10px; }
-        .mic-btn-small { width: 48%; display: inline-block; font-size: 12px; padding: 10px; }
-        .btn-row { display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <div class="history-sidebar">
-        <h4 style="margin-top:0">Таърих (Тоҷики)</h4>
+    <div class="header">
+        <h1>DevSnippets Кодҳои таёр</h1>
+        <p>Ҳамаи рамзҳои лозимӣ дар як ҷо!</p>
+    </div>
+
+    <div class="filter-menu">
+        <button class="filter-btn active" onclick="filterSelection('all', this)">Ҳама</button>
+        <button class="filter-btn" onclick="filterSelection('html', this)">HTML</button>
+        <button class="filter-btn" onclick="filterSelection('css', this)">CSS</button>
+        <button class="filter-btn" onclick="filterSelection('js', this)">JavaScript</button>
+        <button class="filter-btn" onclick="filterSelection('game', this)">Бозиҳо</button>
+        <button class="filter-btn" onclick="filterSelection('anim', this)">Аниматсияҳо</button>
+        <button class="filter-btn" onclick="filterSelection('design', this)">Дизайн</button>
+        <button class="filter-btn" onclick="filterSelection('bg', this)">Фонҳо</button>
     </div>
 
     <div class="container">
-        <h2>Тарҷумон</h2>
-        <select id="interfaceLang" onchange="changeInterfaceLang()" style="width: 150px; margin-bottom: 20px;">
-            <option value="tg">Тоҷикӣ</option>
-            <option value="uz">O'zbekcha</option>
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-        </select>    
-        <select id="lang1">
-            <option value="uz-UZ">O'zbek</option>
-            <option value="tg-TJ">Tojik (Тоҷики)</option>
-            <option value="en-US">English</option>
-            <option value="ru-RU">Русский</option>
-            <option value="ko">한국어 (Hangugeo)</option>
-            <option value="de">Deutsch</option>
-            <option value="ar">اللغة العربية</option>
-            <option value="fr">Français</option>
-            <option value="it">Italiano</option>
-            <option value="fa">فارسی (Fārsi)</option>
-            <option value="pt">Português</option>
-            <option value="ja">日本語 (Nihongo)</option>
-            <option value="hi">हिन्दी (Hindī)</option>
-            <option value="zh-CN">简体中文</option>
-        </select>
-        <textarea id="text1" placeholder="Матнро дохил кунед..."></textarea>
-        <button class="speak-btn" onclick="speak('text1', 'lang1', this)">🔊 Шунидан</button>
-        
-        <div class="btn-row">
-            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="processImage(this)">
-            <button class="img-btn" onclick="document.getElementById('imageInput').click()">🖼️ Расм</button>
-            <button class="mic-btn mic-btn-small" onclick="listen('text1', 'lang1', this)">🎤 Микрофон</button>
+
+        <div class="card filter-item css">
+            <h3>Марказкунонии Flexbox</h3>
+            <div class="visual-box" style="display:flex; justify-content:center; align-items:center; border: 1px dashed #38bdf8;">
+                <div style="width:20px; height:20px; background:#38bdf8;"></div>
+            </div>
+            <div class="desc-text">Ҳамоҳангсозии элемент дар маркази экран ё блок ба таври уфуқӣ ва амудӣ.</div>
+            <pre><code class="language-css">display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
         </div>
 
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #0c2e58;">
+        <div class="card filter-item css">
+            <h3>Глассморфизм (Шишагӣ)</h3>
+            <div class="visual-box" style="background: linear-gradient(45deg, #f06, #3cf);">
+                <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 10px;">Glass</div>
+            </div>
+            <div class="desc-text">Услуби тарроҳии муосир, ки эффекти "шишагӣ" медиҳад.</div>
+            <pre><code class="language-css">background: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(15px);
+border: 1px solid rgba(255,255,255,0.2);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
 
-        <button class="translate-btn" onclick="translateText(this)">Тарҷума кардан ⇄</button>
-        <select id="lang2">
-            <option value="en-US">English</option>
-            <option value="uz-UZ">O'zbek</option>
-            <option value="ru">Русский</option>
-            <option value="tg">Тоҷикӣ</option>
-            <option value="ko">한국어 (Hangugeo)</option>
-            <option value="de">Deutsch</option>
-            <option value="ar">اللغة العربية</option>
-            <option value="fr">Français</option>
-            <option value="it">Italiano</option>
-            <option value="fa">فارسی (Fārsi)</option>
-            <option value="pt">Português</option>
-            <option value="ja">日本語 (Nihongo)</option>
-            <option value="hi">हिन्दी (Hindī)</option>
-            <option value="zh-CN">简体中文</option>
-        </select>
-        <textarea id="text2" placeholder="Тарҷума..."></textarea>
-        <button class="speak-btn" onclick="speak('text2', 'lang2', this)">🔊 Шунидан</button>
+        <div class="card filter-item anim">
+            <h3>Спиннери Боргузорӣ (CSS)</h3>
+            <div class="visual-box">
+                <div style="border: 3px solid #334155; border-top: 3px solid #38bdf8; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite;"></div>
+            </div>
+            <div class="desc-text">Элементи чархзананда барои зебо нишон додани раванди боргузории сайт.</div>
+            <pre><code class="language-css">.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3>Гузариш ба Ҳолати Торик</h3>
+            <div class="visual-box">🌙 Торик/Рӯшан</div>
+            <div class="desc-text">Функсияи гузаронидани рангҳои сайт ба ҳолати торик бо як клик.</div>
+            <pre><code class="language-javascript">document.body.classList.toggle('dark-theme');</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item bg">
+            <h3>Фони Градиенти Меш</h3>
+            <div class="visual-box" style="background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);"></div>
+            <div class="desc-text">Маҷмӯи градиентҳои бисёрранг ва мулоим барои фони сайт.</div>
+            <pre><code class="language-css">body {
+  background-color: #4158D0;
+  background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+<div class="card filter-item css anim">
+            <h3><span>⌨️</span> Аниматсияи Навишт</h3>
+            <div class="visual-box">
+                <div style="border-right: 2px solid var(--primary); width: fit-content; overflow: hidden; white-space: nowrap; animation: typing 2s steps(10) infinite;">Hello Dev!</div>
+            </div>
+            <div class="desc-text">Эффекти автоматии навиштани матн, ки гӯё касе онро дар ҳамон лаҳза чоп карда истодааст.</div>
+            <pre><code class="language-css">.typing {
+  width: 10ch;
+  animation: typing 2s steps(10) infinite, blink .5s step-end infinite alternate;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid;
+}
+@keyframes typing { from { width: 0 } }
+@keyframes blink { 50% { border-color: transparent } }</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js design">
+            <h3><span>⬆️</span> Ба Боло Наздик Шавед</h3>
+            <div class="visual-box">🚀 Scroll UP</div>
+            <div class="desc-text">Тугмае, ки ҳангоми пахш кардан корбарро ба аввали саҳифа ба таври мулоим мебарад.</div>
+            <pre><code class="language-javascript">function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>🔒</span> Санҷиши Рамз</h3>
+            <div class="visual-box">
+                <div style="width: 80%; height: 10px; background: #334155; border-radius: 5px;">
+                    <div style="width: 60%; height: 100%; background: #10b981; border-radius: 5px;"></div>
+                </div>
+            </div>
+            <div class="desc-text">Логикаи санҷиши дарозии рамз ва муайян кардани амнияти он.</div>
+            <pre><code class="language-javascript">const checkStrength = (pw) => {
+  if (pw.length > 8) return "Қавӣ 💪";
+  if (pw.length > 5) return "Миёна ⚠️";
+  return "Суст ❌";
+};</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design">
+            <h3><span>🔍</span> Зум кардани Акс</h3>
+            <div class="visual-box" style="overflow:hidden;">
+                <div style="width:50px; height:50px; background:var(--primary); transition: 0.3s; cursor:pointer;" onmouseover="this.style.transform='scale(1.5)'" onmouseout="this.style.transform='scale(1)'"></div>
+            </div>
+            <div class="desc-text">Ҳангоми наздик бурдани муш ба акс, он калон (zoom) мешавад.</div>
+            <pre><code class="language-css">.img-container { overflow: hidden; }
+.img-container img {
+  transition: transform 0.5s ease;
+}
+.img-container img:hover {
+  transform: scale(1.2);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>🎨</span> Ранги Тасодуфӣ</h3>
+            <div class="visual-box" id="colorBox">#38bdf8</div>
+            <div class="desc-text">Генератори кодҳои ранги HEX ба таври тасодуфӣ.</div>
+            <pre><code class="language-javascript">const randomColor = () => {
+  return '#' + Math.floor(Math.random()*16777215).toString(16);
+};</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css bg">
+            <h3><span>🌈</span> Фони Рангоранг</h3>
+            <div class="visual-box" style="background: linear-gradient(270deg, #ff9a9e, #fad0c4); background-size: 400% 400%; animation: moveBG 3s infinite;"></div>
+            <div class="desc-text">Фоне, ки рангҳояш ба таври мулоим ҳаракат мекунанд.</div>
+            <pre><code class="language-css">@keyframes moveBG {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+.animated-bg {
+  background: linear-gradient(270deg, #ff9a9e, #fad0c4);
+  background-size: 400% 400%;
+  animation: moveBG 15s ease infinite;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css anim">
+            <h3><span>💗</span> Пулсатсия</h3>
+            <div class="visual-box">
+                <div style="width:20px; height:20px; background:#ef4444; border-radius:50%; animation: pulse 1s infinite;"></div>
+            </div>
+            <div class="desc-text">Эффекти тапиши дил ё пулсатсия барои элементҳои муҳим.</div>
+            <pre><code class="language-css">@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>🌐</span> Суръати Интернет</h3>
+            <div class="visual-box">Check Connection</div>
+            <div class="desc-text">Ин код барои санҷидани суръати боргузории маълумот истифода мешавад.</div>
+            <pre><code class="language-javascript">const speed = navigator.connection.downlink;
+console.log(`Суръати интернет: ${speed} Mbps`);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>⏰</span> Соати Рақамӣ</h3>
+            <div class="visual-box" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">12:45:00</div>
+            <div class="desc-text">Намоиши вақти ҷорӣ, ки ҳар сония ба таври автоматӣ нав мешавад.</div>
+            <pre><code class="language-javascript">setInterval(() => {
+  const time = new Date().toLocaleTimeString();
+  document.getElementById('clock').innerHTML = time;
+}, 1000);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item design anim">
+            <h3><span>🎮</span> Эффекти 3D Tilt</h3>
+            <div class="visual-box" style="perspective: 500px;">
+                <div style="width:60px; height:40px; background:var(--glass); border:1px solid #fff; transform: rotateY(20deg);"></div>
+            </div>
+            <div class="desc-text">Ҳангоми наздик бурдани муш, блок ба таври 3D хам мешавад.</div>
+            <pre><code class="language-css">.card-3d {
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+.card-3d:hover {
+  transform: rotateY(15deg) rotateX(15deg);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+        <div class="card filter-item css game">
+            <h3><span>❤️</span> Навори Саломатӣ</h3>
+            <div class="visual-box">
+                <div style="width: 80%; height: 15px; background: #334155; border-radius: 10px; overflow: hidden; border: 1px solid #fff;">
+                    <div style="width: 75%; height: 100%; background: linear-gradient(90deg, #ff4b2b, #ff416c); box-shadow: 0 0 10px #ff4b2b;"></div>
+                </div>
+            </div>
+            <div class="desc-text">Ин навор барои бозиҳо ё нишон додани пешрафти ягон раванд (progress bar) истифода мешавад.</div>
+            <pre><code class="language-css">.health-bar {
+  width: 200px;
+  height: 20px;
+  background: #222;
+  border-radius: 10px;
+  border: 2px solid #fff;
+}
+.progress {
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(to right, #f00, #f06);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css anim">
+            <h3><span>💀</span> Скелетон (Боргузорӣ)</h3>
+            <div class="visual-box">
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 10px;">
+                    <div style="width: 40%; height: 12px; background: #334155; border-radius: 4px; animation: skeleton 1.5s infinite;"></div>
+                    <div style="width: 100%; height: 12px; background: #334155; border-radius: 4px; animation: skeleton 1.5s infinite;"></div>
+                    <div style="width: 80%; height: 12px; background: #334155; border-radius: 4px; animation: skeleton 1.5s infinite;"></div>
+                </div>
+            </div>
+            <div class="desc-text">Эффекти аниматсионии муосир, ки то омадани маълумот дар сайт нишон дода мешавад.</div>
+            <pre><code class="language-css">@keyframes skeleton {
+  0% { opacity: 0.3 }
+  50% { opacity: 0.7 }
+  100% { opacity: 0.3 }
+}
+.skeleton-line {
+  background: #334155;
+  animation: skeleton 1.5s infinite linear;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>🔊</span> Матн ба Овоз</h3>
+            <div class="visual-box">📢 "Салом Дунё"</div>
+            <div class="desc-text">Ин код ҳар гуна матни навишташударо ба овози сунъӣ табдил медиҳад.</div>
+            <pre><code class="language-javascript">const speak = (msg) => {
+  const speech = new SpeechSynthesisUtterance(msg);
+  speech.lang = 'ru-RU'; // Ё забони дигар
+  window.speechSynthesis.speak(speech);
+};</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design">
+            <h3><span>🌈</span> Матни Градиентӣ</h3>
+            <div class="visual-box">
+                <h2 style="background: linear-gradient(45deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">PREMIUM</h2>
+            </div>
+            <div class="desc-text">Тарзи сохтани матне, ки бо рангҳои градиентӣ дурахшон аст.</div>
+            <pre><code class="language-css">.gradient-text {
+  background: linear-gradient(45deg, #f06, #4facfe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js design">
+            <h3><span>👁️</span> Намоиши Рамз</h3>
+            <div class="visual-box">🔑 ****** [👁️]</div>
+            <div class="desc-text">Логика барои нишон додан ва пинҳон кардани рамз дар майдони вуруд (input).</div>
+            <pre><code class="language-javascript">const togglePW = (id) => {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+};</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>🖥️</span> Ҳолати Пурра</h3>
+            <div class="visual-box">🔲 Fullscreen</div>
+            <div class="desc-text">Бо ин код шумо метавонед сайтро ба ҳолати экрани пурра (fullscreen) гузаронед.</div>
+            <pre><code class="language-javascript">function openFullscreen() {
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen();
+  }
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design anim">
+            <h3><span>🌊</span> Риппл Эффект</h3>
+            <div class="visual-box">
+                <div style="padding: 10px 20px; background: var(--primary); color: #000; border-radius: 5px; cursor: pointer;">Клик кунед</div>
+            </div>
+            <div class="desc-text">Ҳангоми пахш кардан дар болои тугма мавҷи обмонанд пайдо мешавад.</div>
+            <pre><code class="language-css">.ripple-btn {
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s;
+}
+.ripple-btn:active {
+  background-color: rgba(255, 255, 255, 0.3);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>🔢</span> Ҳисобкунаки Рақам</h3>
+            <div class="visual-box">
+                <button style="width:30px;">-</button>
+                <span style="margin: 0 15px; font-weight: bold;">10</span>
+                <button style="width:30px;">+</button>
+            </div>
+            <div class="desc-text">Функсия барои зиёд ва кам кардани ададҳо (масалан дар аробаи харид).</div>
+            <pre><code class="language-javascript">let count = 0;
+const changeValue = (v) => {
+  count += v;
+  document.getElementById('val').innerText = count;
+};</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>📖</span> Вақти Хондан</h3>
+            <div class="visual-box">⏱️ 3 min read</div>
+            <div class="desc-text">Ҳисоб кардани он, ки барои хондани матн чанд дақиқа вақт лозим аст.</div>
+            <pre><code class="language-javascript">const text = "Текст...";
+const wpm = 200; // калима дар як дақиқа
+const time = Math.ceil(text.split(' ').length / wpm);
+console.log(`Вақти хондан: ${time} дақиқа`);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css anim design">
+            <h3><span>🔥</span> Тугмаи Аниматсионӣ</h3>
+            <div class="visual-box">
+                <button style="background: linear-gradient(45deg, #00f2fe, #4facfe, #00f2fe); background-size: 200%; padding: 10px 20px; border: none; color: #000; border-radius: 8px; animation: grad 2s infinite linear;">GO</button>
+            </div>
+            <div class="desc-text">Тугмае, ки рангҳои градиентиаш доимо ҳаракат мекунанд.</div>
+            <pre><code class="language-css">@keyframes grad {
+  0% { background-position: 0% 50% }
+  100% { background-position: 200% 50% }
+}
+.animated-btn {
+  background: linear-gradient(45deg, #f06, #4facfe, #f06);
+  background-size: 200%;
+  animation: grad 3s linear infinite;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+        <div class="card filter-item js design">
+            <h3><span>🖱️</span> Курсори Дизайнерӣ</h3>
+            <div class="visual-box">
+                <div style="width: 20px; height: 20px; border: 2px solid var(--primary); border-radius: 50%; position: relative;"></div>
+            </div>
+            <div class="desc-text">Иваз кардани курсори стандартӣ ба як доираи зебо, ки бо ҳаракати муш пайравӣ мекунад.</div>
+            <pre><code class="language-javascript">document.addEventListener('mousemove', (e) => {
+  const cursor = document.querySelector('.cursor');
+  cursor.style.left = e.pageX + 'px';
+  cursor.style.top = e.pageY + 'px';
+});</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design">
+            <h3><span>📂</span> Аккордеони Саволҳо</h3>
+            <div class="visual-box">
+                <div style="width: 80%; border: 1px solid var(--glass-border); padding: 5px; border-radius: 5px;">
+                    <div style="background: var(--primary); color: #000; padding: 2px 10px; font-size: 10px;">Савол? [+]</div>
+                </div>
+            </div>
+            <div class="desc-text">Барои пинҳон ва нишон додани матнҳои дароз (масалан, саволу ҷавобҳо).</div>
+            <pre><code class="language-css">.accordion {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.active .accordion {
+  max-height: 100px;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>⏱️</span> Секундомер</h3>
+            <div class="visual-box" style="font-family: monospace; font-size: 1.2rem;">00:15:24</div>
+            <div class="desc-text">Код барои сохтани секундомер, ки дар бозиҳо ё лоиҳаҳои вақтсанҷӣ лозим аст.</div>
+            <pre><code class="language-javascript">let seconds = 0;
+setInterval(() => {
+  seconds++;
+  let mins = Math.floor(seconds / 60);
+  let secs = seconds % 60;
+  console.log(`${mins}:${secs}`);
+}, 1000);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design">
+            <h3><span>⚪</span> Дизайни Неоморф</h3>
+            <div class="visual-box">
+                <div style="width: 50px; height: 50px; background: #e0e0e0; border-radius: 10px; box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;"></div>
+            </div>
+            <div class="desc-text">Эҷоди эффекти ҳаҷмдор ва "нарм" барои тугмаҳо ва блокҳо.</div>
+            <pre><code class="language-css">.neumorphic {
+  border-radius: 50px;
+  background: #e0e0e0;
+  box-shadow: 20px 20px 60px #bebebe,
+             -20px -20px 60px #ffffff;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css anim">
+            <h3><span>🪞</span> Инъикоси Матн</h3>
+            <div class="visual-box">
+                <div style="font-weight: bold; font-size: 1.2rem; -webkit-box-reflect: below 0px linear-gradient(transparent, rgba(255,255,255,0.2));">MIRROR</div>
+            </div>
+            <div class="desc-text">Эҷоди эффекти инъикоси оинавӣ дар зери матн бидуни истифодаи акс.</div>
+            <pre><code class="language-css">.reflect {
+  font-size: 40px;
+  -webkit-box-reflect: below 1px linear-gradient(transparent, #0004);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js">
+            <h3><span>✍️</span> Ҳисобкунаки Матн</h3>
+            <div class="visual-box">Symbols: 124</div>
+            <div class="desc-text">Ҳисобкунии автоматии миқдори ҳарфҳо дар дохили майдони матнӣ (textarea).</div>
+            <pre><code class="language-javascript">const textarea = document.querySelector('textarea');
+textarea.addEventListener('input', () => {
+  const count = textarea.value.length;
+  console.log("Шумораи ҳарфҳо: " + count);
+});</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design">
+            <h3><span>🌑</span> Сояи Профессоналӣ</h3>
+            <div class="visual-box">
+                <div style="width: 60px; height: 30px; background: var(--card-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+            </div>
+            <div class="desc-text">Тарзи сохтани сояи мулоим ва воқеӣ, ки блокҳоро аз экран ҷудо мекунад.</div>
+            <pre><code class="language-css">.soft-shadow {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 
+              0 6px 6px rgba(0,0,0,0.23);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js design anim">
+            <h3><span>📏</span> Хатти Скролл</h3>
+            <div class="visual-box">
+                <div style="width: 100%; height: 4px; background: #334155;">
+                    <div style="width: 40%; height: 100%; background: var(--primary);"></div>
+                </div>
+            </div>
+            <div class="desc-text">Хатти болои саҳифа, ки нишон медиҳад корбар чӣ қадар саҳифаро хондааст.</div>
+            <pre><code class="language-javascript">window.onscroll = () => {
+  let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  let scrolled = (winScroll / height) * 100;
+  document.getElementById("myBar").style.width = scrolled + "%";
+};</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js design">
+            <h3><span>📑</span> Системаи Табҳо</h3>
+            <div class="visual-box">
+                <div style="display:flex; gap:5px;">
+                    <div style="background:var(--primary); padding:2px 5px; font-size:8px; color:#000;">Tab 1</div>
+                    <div style="background:var(--glass); padding:2px 5px; font-size:8px;">Tab 2</div>
+                </div>
+            </div>
+            <div class="desc-text">Гузариш байни қисмҳои мухталифи мундариҷа дар як блок.</div>
+            <pre><code class="language-javascript">function openTab(tabName) {
+  let tabs = document.getElementsByClassName("content");
+  for (let t of tabs) t.style.display = "none";
+  document.getElementById(tabName).style.display = "block";
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design">
+            <h3><span>🖼️</span> Матн болои Акс</h3>
+            <div class="visual-box" style="background: url('https://via.placeholder.com/100') center/cover; position: relative;">
+                <div style="position: absolute; bottom: 0; background: rgba(0,0,0,0.6); width: 100%; font-size: 10px; text-align: center;">Info</div>
+            </div>
+            <div class="desc-text">Нишон додани маълумот ё тугмаҳо дар болои акс ҳангоми наздик кардани муш.</div>
+            <pre><code class="language-css">.overlay {
+  position: absolute;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Black see-through */
+  color: #f1f1f1;
+  width: 100%;
+  transition: .5s ease;
+  opacity: 0;
+}
+.container:hover .overlay { opacity: 1; }</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+        <div class="card filter-item js game">
+            <h3><span>💥</span> Бархӯрди Объектҳо</h3>
+            <div class="visual-box">
+                <div style="width:30px; height:30px; background:#ef4444; position:absolute; left:40%;"></div>
+                <div style="width:30px; height:30px; background:#22c55e; position:absolute; left:50%;"></div>
+            </div>
+            <div class="desc-text">Мантиқи асосӣ барои фаҳмидани он ки оё ду объекти мураббаъ дар бозӣ бо ҳам бархӯрданд ё не.</div>
+            <pre><code class="language-javascript">function isColliding(rect1, rect2) {
+  return rect1.x < rect2.x + rect2.w &&
+         rect1.x + rect1.w > rect2.x &&
+         rect1.y < rect2.y + rect2.h &&
+         rect1.h + rect1.y > rect2.y;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>🎮</span> Идоракунии Тугмаҳо</h3>
+            <div class="visual-box">W, A, S, D Controls</div>
+            <div class="desc-text">Код барои пайгирӣ кардани тугмаҳои пахшшуда, ки барои ҳаракати каҳрамон дар бозӣ лозим аст.</div>
+            <pre><code class="language-javascript">const keys = {};
+window.addEventListener('keydown', e => keys[e.key] = true);
+window.addEventListener('keyup', e => keys[e.key] = false);
+
+// Дар дохили Game Loop:
+if (keys['w']) player.y -= 5;
+if (keys['s']) player.y += 5;</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css game anim">
+            <h3><span>📳</span> Ларзиши Экран</h3>
+            <div class="visual-box">
+                <div style="width:50px; height:50px; background:var(--primary); animation: shake 0.5s infinite;" id="shakeEl"></div>
+            </div>
+            <div class="desc-text">Эффекте, ки ҳангоми таркиш ё зарар дидани каҳрамон экранро меларзонад.</div>
+            <pre><code class="language-css">@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  50% { transform: translate(3px, 2px) rotate(-1deg); }
+  100% { transform: translate(1px, -2px) rotate(0deg); }
+}
+.shake-effect { animation: shake 0.5s; }</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>🆙</span> Системаи Левел</h3>
+            <div class="visual-box">Level: 5 | XP: 1250</div>
+            <div class="desc-text">Формулаи математикӣ барои ҳисоб кардани таҷриба (XP) ва гузаштан ба марҳилаи нав.</div>
+            <pre><code class="language-javascript">function getNextLevelXP(level) {
+  return Math.floor(100 * Math.pow(level, 1.5));
+}
+// Мисол: Барои левели 2 -> 282 XP лозим</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design game">
+            <h3><span>💀</span> Экрани Game Over</h3>
+            <div class="visual-box">
+                <div style="background:rgba(255,0,0,0.2); width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:red; font-weight:bold;">GAME OVER</div>
+            </div>
+            <div class="desc-text">Тарҳи шаффоф ва зебо барои намоиши анҷоми бозӣ дар болои экран.</div>
+            <pre><code class="language-css">.game-over {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>🎲</span> Рақами Тасодуфӣ</h3>
+            <div class="visual-box">Min: 1 | Max: 100</div>
+            <div class="desc-text">Функсия барои сохтани адади тасодуфӣ дар байни ду рақам (барои пайдоиши душманон).</div>
+            <pre><code class="language-javascript">function getRandom(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+// Истифода: getRandom(1, 10);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item css design game">
+            <h3><span>🎒</span> Слотҳои Инвентар</h3>
+            <div class="visual-box">
+                <div style="display:flex; gap:10px;">
+                    <div style="width:30px; height:30px; background:var(--glass); border:1px solid var(--primary);"></div>
+                    <div style="width:30px; height:30px; background:var(--glass); border:1px solid var(--primary);"></div>
+                </div>
+            </div>
+            <div class="desc-text">Тарзи сохтани слотҳои инвентар барои нигоҳ доштани ашёҳои бозӣ.</div>
+            <pre><code class="language-css">.slot {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid #444;
+  border-radius: 8px;
+}
+.slot:hover { border-color: #00f2fe; }</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>⏳</span> Таймери Бозӣ</h3>
+            <div class="visual-box">Time Left: 60s</div>
+            <div class="desc-text">Таймери баръакс барои бозиҳое, ки вақти маҳдуд доранд.</div>
+            <pre><code class="language-javascript">let timeLeft = 60;
+const timer = setInterval(() => {
+  timeLeft--;
+  if(timeLeft <= 0) {
+    clearInterval(timer);
+    alert("Вақт тамом шуд!");
+  }
+}, 1000);</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js anim game">
+            <h3><span>🎆</span> Эффекти Таркиш</h3>
+            <div class="visual-box">💥 Particles</div>
+            <div class="desc-text">Мантиқи сохтани зарраҳои майда (particles), ки ҳангоми таркиш ба ҳар тараф пароканда мешаванд.</div>
+            <pre><code class="language-javascript">particles.push({
+  x: explosionX,
+  y: explosionY,
+  vx: Math.random() * 4 - 2,
+  vy: Math.random() * 4 - 2,
+  life: 100
+});</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+
+        <div class="card filter-item js game">
+            <h3><span>🎯</span> Пайравӣ ба Муш</h3>
+            <div class="visual-box">Pointer Follower</div>
+            <div class="desc-text">Код барои он ки ягон объект (масалан, нишонгир) мушро ба таври мулоим таъқиб кунад.</div>
+            <pre><code class="language-javascript">let targetX = 0, currentX = 0;
+function animate() {
+  let dx = targetX - currentX;
+  currentX += dx * 0.1; // Суръати пайравӣ
+  requestAnimationFrame(animate);
+}</code></pre>
+            <button class="copy-btn">Нусхабардорӣ</button>
+        </div>
+    <div class="card filter-item css js anim">
+    <h3><span>✨</span> Magic Nav Menu</h3>
+    <div class="visual-box" style="height: 120px; background: #222327; display: flex; align-items: center; justify-content: center; border-radius: 15px;">
+        <div style="width: 200px; height: 50px; background: #fff; border-radius: 10px; position: relative; display: flex; justify-content: space-around; align-items: center;">
+            <div style="width: 40px; height: 40px; background: #29fd53; border-radius: 50%; border: 4px solid #222327; position: absolute; top: -50%; left: 15px;"></div>
+            <span style="color: #222; font-size: 18px;">🏠</span>
+            <span style="color: #222; font-size: 18px;">👤</span>
+            <span style="color: #222; font-size: 18px;">⚙️</span>
+        </div>
+        
+    </div>
+    <p class="desc-text">Instagram trendidagi "Magic" menyu. Element tanlanganda indikator yumshoq harakatlanib, belgini tepaga ko'taradi.</p>
+
+    <pre><code class="language-html">&lt;div class="navigation"&gt;
+  &lt;ul&gt;
+    &lt;li class="list active"&gt;
+      &lt;a href="#"&gt;
+        &lt;span class="icon"&gt;&lt;ion-icon name="home-outline"&gt;&lt;/ion-icon&gt;&lt;/span&gt;
+        &lt;span class="text"&gt;Asosiy&lt;/span&gt;
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li class="list"&gt;
+      &lt;a href="#"&gt;
+        &lt;span class="icon"&gt;&lt;ion-icon name="person-outline"&gt;&lt;/ion-icon&gt;&lt;/span&gt;
+        &lt;span class="text"&gt;Profil&lt;/span&gt;
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li class="list"&gt;
+      &lt;a href="#"&gt;
+        &lt;span class="icon"&gt;&lt;ion-icon name="chatbubble-outline"&gt;&lt;/ion-icon&gt;&lt;/span&gt;
+        &lt;span class="text"&gt;Xabar&lt;/span&gt;
+      &lt;/a&gt;
+    &lt;/li&gt;
+    &lt;div class="indicator"&gt;&lt;/div&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+
+    <pre><code class="language-css">.navigation {
+  width: 400px; height: 70px; background: #fff;
+  display: flex; justify-content: center; align-items: center;
+  border-radius: 10px; position: relative;
+}
+.navigation ul { display: flex; width: 350px; }
+.navigation ul li { list-style: none; position: relative; width: 70px; height: 70px; z-index: 1; }
+.navigation ul li a { position: relative; display: flex; flex-direction: column; width: 100%; text-align: center; }
+.navigation ul li .icon { position: relative; display: block; line-height: 75px; font-size: 1.5em; transition: 0.5s; color: #222327; }
+.navigation ul li.active .icon { transform: translateY(-35px); }
+.indicator {
+  position: absolute; top: -50%; width: 70px; height: 70px;
+  background: #29fd53; border-radius: 50%; border: 6px solid #222327;
+  transition: 0.5s;
+}
+/* Indikator harakati (har bir element uchun) */
+.navigation ul li:nth-child(1).active ~ .indicator { transform: translateX(calc(70px * 0)); }
+.navigation ul li:nth-child(2).active ~ .indicator { transform: translateX(calc(70px * 1)); }
+.navigation ul li:nth-child(3).active ~ .indicator { transform: translateX(calc(70px * 2)); }</code></pre>
+
+    <pre><code class="language-javascript">const list = document.querySelectorAll('.list');
+function activeLink() {
+  list.forEach((item) => item.classList.remove('active'));
+  this.classList.add('active');
+}
+list.forEach((item) => item.addEventListener('click', activeLink));</code></pre>
+
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div> 
+<div class="card filter-item anim css">
+    <h3>Градиенти Ҷунбон</h3>
+    <div class="visual-box" style="background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradientBG 5s ease infinite;">
+        <span style="color: white; font-weight: bold;">Animated BG</span>
+    </div>
+    <div class="desc-text">Фони рангҳои ивазшаванда, ки барои саҳифаҳои асосӣ (Landing Pages) намуди муосир медиҳад.</div>
+    <pre><code class="language-css">@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+
+<div class="card filter-item css">
+    <h3>Фони Шабакавӣ</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 20px 20px;">
+        <span style="color: #38bdf8;">Grid Layout</span>
+    </div>
+    <div class="desc-text">Ин фони "сетка" барои сохтани панелҳои идоракунӣ (Dashboard) ва лоиҳаҳои техникӣ истифода мешавад.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(#1e293b 1px, transparent 1px),
+  linear-gradient(90deg, #1e293b 1px, transparent 1px);
+background-size: 20px 20px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+
+<div class="card filter-item css html">
+    <h3>Эффекти Шишагӣ</h3>
+    <div class="visual-box" style="background: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=200') center; padding: 15px;">
+        <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); width: 80%; height: 40px; border-radius: 10px;"></div>
+    </div>
+    <div class="desc-text">Эффекти шишаи хира (Glassmorphism), ки дар тарҳҳои муосири Apple ва Windows 11 бисёр дида мешавад.</div>
+    <pre><code class="language-css">background: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.2);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+
+<div class="card filter-item css">
+    <h3>Фони Нуқтавӣ</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 15px 15px;">
+        <span style="color: #94a3b8;">Dot Pattern</span>
+    </div>
+    <div class="desc-text">Фони ором бо нуқтаҳои хурд, ки барои блокҳои матнӣ ва мақолаҳо хеле мувофиқ аст.</div>
+    <pre><code class="language-css">background-image: radial-gradient(#334155 1px, transparent 1px);
+background-size: 15px 15px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css">
+    <h3>Mesh Gradient</h3>
+    <div class="visual-box" style="background-color: #ff9a9e; background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);">
+        <span style="color: #1e293b; font-weight: bold;">Soft Colors</span>
+    </div>
+    <div class="desc-text">Омехтаи мулоими рангҳо барои сохтани фони ором ва муосир.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css">
+    <h3>Фони Нуқтавӣ</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 18px 18px;">
+        <span style="color: #94a3b8; letter-spacing: 2px;">DOTS</span>
+    </div>
+    <div class="desc-text">Ин фони оддӣ барои блокҳои иттилоотӣ ва мақолаҳои дароз беҳтарин аст.</div>
+    <pre><code class="language-css">background-image: 
+  radial-gradient(#334155 1px, transparent 1px);
+background-size: 18px 18px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css html">
+    <h3>Услуби Шишагин</h3>
+    <div class="visual-box" style="background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%); padding: 15px;">
+        <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); width: 100%; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">Glass Card</div>
+    </div>
+    <div class="desc-text">Эффекти шишаи хира, ки дар интерфейсҳои Apple ва Windows 11 истифода мешавад.</div>
+    <pre><code class="language-css">background: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.1);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css">
+    <h3>Шабакаи Дизайн</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px); background-size: 25px 25px;">
+        <span style="color: #38bdf8; font-family: monospace;">STYLISH GRID</span>
+    </div>
+    <div class="desc-text">Фони "сетка" барои лоиҳаҳое, ки намуди дақиқ ва математикиро талаб мекунанд.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(#1e293b 1px, transparent 1px),
+  linear-gradient(90deg, #1e293b 1px, transparent 1px);
+background-size: 25px 25px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item anim css">
+    <h3>Градиенти Ҳаракаткунанда</h3>
+    <div class="visual-box" style="background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradientBG 10s ease infinite; border-radius: 8px;">
+        <span style="color: white; font-weight: bold; text-shadow: 1px 1px 5px rgba(0,0,0,0.3);">Эффекти Динамикӣ</span>
+    </div>
+    <div class="desc-text">Фони рангҳои ҷолиб, ки ба сайт зиндагӣ ва ҳаракат мебахшад.</div>
+    <pre><code class="language-css">@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+/* background-size бояд 400% бошад */</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css bg">
+    <h3>Градиенти Ромбовидӣ</h3>
+    <div class="visual-box" style="background: conic-gradient(from 180deg at 50% 50%, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ee7752); border-radius: 8px;">
+        <span style="color: white; font-weight: bold; text-shadow: 1px 1px 5px rgba(0,0,0,0.3);">Conic Effect</span>
+    </div>
+    <div class="desc-text">Омехтаи рангҳои ҷолиб дар шакли ромб, ки ба сайт намуди зинда ва ҳаракатро мебахшад.</div>
+    <pre><code class="language-css">background: conic-gradient(
+  from 180deg at 50% 50%,
+  #ee7752, #e73c7e,
+  #23a6d5, #23d5ab,
+  #ee7752);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css bg">
+    <h3>Шабакаи Матритсавӣ</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: linear-gradient(#1e293b 2px, transparent 2px), linear-gradient(90deg, #1e293b 2px, transparent 2px); background-size: 30px 30px;">
+        <span style="color: #23d5ab; font-family: monospace;">MATRIX GRID</span>
+    </div>
+    <div class="desc-text">Фони шабакавӣ бо рангҳои торик, ки барои сайтҳои хакерӣ ва техникӣ мувофиқ аст.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(#1e293b 2px, transparent 2px),
+  linear-gradient(90deg, #1e293b 2px, transparent 2px);
+background-size: 30px 30px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css anim bg">
+    <h3>Нерӯи Дурахшон</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: radial-gradient(#ee7752 2px, transparent 2px); background-size: 20px 20px; animation: neonPulse 2s linear infinite;">
+        <span style="color: #e73c7e; font-weight: bold; text-shadow: 0 0 10px #e73c7e;">Neon Pulse</span>
+    </div>
+    <div class="desc-text">Эффекти нерӯи дурахшон, ки ба сайт намуди касбӣ ва муосир мебахшад.</div>
+    <pre><code class="language-css">background-image: 
+  radial-gradient(#ee7752 2px, transparent 2px);
+background-size: 20px 20px;
+animation: neonPulse 2s linear infinite;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css bg">
+    <h3>Шабакаи Минималистӣ</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: linear-gradient(#334155 1px, transparent 1px), linear-gradient(90deg, #334155 1px, transparent 1px); background-size: 15px 15px;">
+        <span style="color: #94a3b8; letter-spacing: 2px;">SOFT GRID</span>
+    </div>
+    <div class="desc-text">Ин фони шабакавӣ барои блокҳои матнӣ ва мақолаҳои дароз беҳтарин аст.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(#334155 1px, transparent 1px),
+  linear-gradient(90deg, #334155 1px, transparent 1px);
+background-size: 15px 15px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css anim bg">
+    <h3>Mesh Gradient Effect</h3>
+    <div class="visual-box" style="background: linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%), linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%), linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%); border-radius: 8px;">
+        <span style="color: #f1f5f9; font-weight: bold; text-shadow: 1px 1px 5px rgba(0,0,0,0.3);">Soft Waves</span>
+    </div>
+    <div class="desc-text">Омехтаи мулоими рангҳо бо эффекти мавҷнок, ки ба сайт намуди муосир ва касбӣ медиҳад.</div>
+    <pre><code class="language-css">background: 
+  linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%),
+  linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%),
+  linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css bg">
+    <h3>Градиенти Фонусӣ</h3>
+    <div class="visual-box" style="background: radial-gradient(circle at 50% 50%, #ee7752 20%, #e73c7e 40%, #23a6d5 60%, #23d5ab 80%); border-radius: 8px;">
+        <span style="color: white; font-weight: bold; text-shadow: 1px 1px 5px rgba(0,0,0,0.3);">Conic Circle</span>
+    </div>
+    <div class="desc-text">Омехтаи рангҳои ҷолиб дар шакли доира, ки ба сайт намуди муосир медиҳад.</div>
+    <pre><code class="language-css">background: radial-gradient(
+  circle at 50% 50%,
+  #ee7752 20%, #e73c7e 40%,
+  #23a6d5 60%, #23d5ab 80%);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css bg">
+    <h3>Шабакаи Чоркунҷагӣ</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;">
+        <span style="color: #38bdf8; font-family: monospace;">SQUARE GRID</span>
+    </div>
+    <div class="desc-text">Фони шабакавӣ бо чоркунҷаҳои хурд, ки барои сайтҳои техникӣ мувофиқ аст.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(45deg, #1e293b 25%, transparent 25%),
+  linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+  linear-gradient(45deg, transparent 75%, #1e293b 75%),
+  linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+background-size: 20px 20px;
+background-position: 0 0, 0 10px, 10px -10px, -10px 0px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css BG">
+    <h3>MESH GRADIENT EFFECT</h3>
+    <div class="visual-box" style="background-color: #4158D0; background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);">
+        <span style="color: #f1f5f9; font-weight: bold;">Soft Mesh</span>
+    </div>
+    <div class="desc-text">Омехтаи мулоими рангҳо бо эффекти гӯшагӣ, ки ба сайт намуди муосир ва касбӣ медиҳад.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css bg">
+    <h3>Фони Нуқтавии Дурахшон</h3>
+    <div class="visual-box" style="background-color: #0f172a; background-image: radial-gradient(#29fd53 1px, transparent 1px); background-size: 25px 25px;">
+        <span style="color: #29fd53; text-shadow: 0 0 5px #29fd53;">NEON DOTS</span>
+    </div>
+    <div class="desc-text">Ин фони оддӣ барои блокҳои иттилоотӣ ва мақолаҳои дароз беҳтарин аст.</div>
+    <pre><code class="language-css">background-image: 
+  radial-gradient(#29fd53 1px, transparent 1px);
+background-size: 25px 25px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item css BG">
+    <h3>CHECKERED MESH EFFECT</h3>
+    <div class="visual-box" style="background-color: #ff9a9e; background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); background-size: 40px 40px; background-position: 0 0, 20px 20px, 0px 20px, 20px 0px;">
+        <span style="color: #1e293b; font-weight: bold;">Soft Check</span>
+    </div>
+    <div class="desc-text">Омехтаи мулоими рангҳо бо эффекти чоркунҷагӣ, ки ба сайт намуди муосир ва касбӣ медиҳад.</div>
+    <pre><code class="language-css">background-image: 
+  linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+background-size: 40px 40px;
+background-position: 0 0, 20px 20px, 0px 20px, 20px 0px;</code></pre>
+    <button class="copy-btn">Нусхабардорӣ</button>
+</div>
+<div class="card filter-item anim css">
+    <h3>Тугмаи Дурахшон</h3>
+    <div class="visual-box">✨ Glow Effect</div>
+    <div class="live-preview">
+        <div style="display:flex; justify-content:center; align-items:center; height:80px;">
+            <button style="padding: 12px 24px; border: none; background: #38bdf8; color: white; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); font-weight: bold;">GLOW</button>
+        </div>
+    </div>
+    <div class="desc-text">Тугмае, ки бо истифода аз `box-shadow` эффекти нурдиҳиро ба вуҷуд меорад.</div>
+    <pre><code class="language-css">box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
     </div>
 </div>
 
-<script>
-    // RASM ORQALI TARJIMA QILISH FUNKSIYASI
-    async function processImage(input) {
-        if (!input.files || !input.files[0]) return;
-        const btn = document.querySelector('.img-btn');
-        const originalText = btn.innerText;
-        btn.innerText = "⏳...";
-        
-        try {
-            const result = await Tesseract.recognize(input.files[0], 'eng+rus+uzb');
-            document.getElementById('text1').value = result.data.text;
-            btn.innerText = "✅ Tayyor";
-            setTimeout(() => btn.innerText = originalText, 2000);
-        } catch (e) {
-            btn.innerText = "❌ Xato";
-            setTimeout(() => btn.innerText = originalText, 2000);
+<div class="card filter-item anim html">
+    <h3>Боргирии Скелетӣ</h3>
+    <div class="visual-box">🦴 Loading State</div>
+    <div class="live-preview">
+        <div style="width: 200px; padding: 10px; background: #1e293b; border-radius: 10px; margin: auto;">
+            <div style="height: 100px; background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%); background-size: 200% 100%; animation: skeleton 1.5s infinite; border-radius: 8px;"></div>
+        </div>
+    </div>
+    <div class="desc-text">Ин эффект барои беҳтар кардани UX (таҷрибаи корбар) ҳангоми боргирӣ хизмат мекунад.</div>
+    <pre><code class="language-css">@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item css html">
+    <h3>Гузарандаи IOS</h3>
+    <div class="visual-box">🔘 Switch</div>
+    <div class="live-preview">
+        <div style="display:flex; justify-content:center; align-items:center; height:80px;">
+            <label style="width: 50px; height: 26px; background: #334155; border-radius: 20px; position: relative; cursor: pointer;" onclick="this.querySelector('div').style.left = this.querySelector('div').style.left === '26px' ? '2px' : '26px'; this.style.background = this.style.background === 'rgb(16, 185, 129)' ? '#334155' : '#10b981';">
+                <div style="width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.3s;"></div>
+            </label>
+        </div>
+    </div>
+    <div class="desc-text">Гузарандаи услубӣ барои танзимоти сайт (масалан, Dark Mode).</div>
+    <pre><code class="language-css">transition: 0.3s; border-radius: 50%;</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item anim html">
+    <h3>Матни Навишташаванда</h3>
+    <div class="visual-box">✍️ Auto Typing</div>
+    <div class="live-preview">
+        <div style="display:flex; justify-content:center; align-items:center; height:80px;">
+            <div style="font-family: monospace; border-right: 2px solid; width: 14ch; white-space: nowrap; overflow: hidden; animation: typing 2s steps(14), blink 0.5s step-end infinite;">Hello, World!</div>
+        </div>
+    </div>
+    <div class="desc-text">Эффекти ҷолиб барои муаррифии сарлавҳаҳои сайт.</div>
+    <pre><code class="language-css">animation: typing 2s steps(20);</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item css">
+    <h3>Шишаи Хеле Хира</h3>
+    <div class="visual-box" style="background: linear-gradient(45deg, #f093fb, #f5576c);">❄️ Glass</div>
+    <div class="live-preview" style="background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400') center; padding: 20px; align-items:center; justify-content:center;">
+        <div style="backdrop-filter: blur(15px); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); width:100%; height: 60px; border-radius: 15px;"></div>
+    </div>
+    <div class="desc-text">Ин эффект барои блокҳои муҳим дар болои фонҳои ранга мувофиқ аст.</div>
+    <pre><code class="language-css">backdrop-filter: blur(15px);</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item anim css">
+    <h3>Матни Ранга</h3>
+    <div class="visual-box">🌈 Rainbow Text</div>
+    <div class="live-preview">
+        <div style="display:flex; justify-content:center; align-items:center; height:80px;">
+            <h2 style="background: linear-gradient(90deg, #ff0000, #ffff00, #38bdf8, #ff0000); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientBG 3s linear infinite; margin:0;">Yusufbek</h2>
+        </div>
+    </div>
+    <div class="desc-text">Барои логотип ё сарлавҳаҳои дурахшон истифода мешавад.</div>
+    <pre><code class="language-css">background-clip: text; animation: move 3s;</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item css">
+    <h3>Фони Нуқтавӣ</h3>
+    <div class="visual-box" style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 15px 15px;">⚫ Dots</div>
+    <div class="live-preview" style="background-image: radial-gradient(#38bdf8 1px, #1e293b 1px); background-size: 10px 10px; height: 80px;"></div>
+    <div class="desc-text">Фони ором ва тоза барои саҳифаҳои иттилоотӣ.</div>
+    <pre><code class="language-css">background-image: radial-gradient(#38bdf8 1px, transparent 1px);</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item js html">
+    <h3>Тугмаи Мавҷнок</h3>
+    <div class="visual-box">🌊 Ripple</div>
+    <div class="live-preview">
+        <div style="display:flex; justify-content:center; align-items:center; height:80px;">
+            <button style="position: relative; overflow: hidden; padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight:bold;">Клик кунед</button>
+        </div>
+    </div>
+    <div class="desc-text">Ин эффект ҳисси пахш кардани тугмаро воқеӣ мегардонад.</div>
+    <pre><code class="language-css">overflow: hidden; position: relative;</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item css anim">
+    <h3>Прогресси Доиравӣ</h3>
+    <div class="visual-box">⭕ Progress</div>
+    <div class="live-preview">
+        <div style="display:flex; justify-content:center; align-items:center; height:80px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: conic-gradient(#38bdf8 75%, #334155 0); display: flex; align-items: center; justify-content: center;">
+                <div style="width: 50px; height: 50px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color:white;">75%</div>
+            </div>
+        </div>
+    </div>
+    <div class="desc-text">Барои нишон додани маҳорат (skills) ё дараҷаи анҷоми супориш.</div>
+    <pre><code class="language-css">background: conic-gradient(#38bdf8 75%, #334155 0);</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+<div class="card filter-item css">
+    <h3>Нейоморфизм</h3>
+    <div class="visual-box">🎨 Soft UI</div>
+    <div class="live-preview" style="background: #e0e0e0; border-radius: 12px; padding: 20px; align-items:center; justify-content:center;">
+        <div style="width: 60px; height: 60px; background: #e0e0e0; border-radius: 15px; box-shadow: 8px 8px 16px #bebebe, -8px -8px 16px #ffffff;"></div>
+    </div>
+    <div class="desc-text">Услуби дизайн, ки дар он элементҳо аз фон "баромада" менамоянд.</div>
+    <pre><code class="language-css">box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;</code></pre>
+    <div class="btn-group">
+        <button class="btn start-btn" onclick="togglePreview(this)">Намоиш 🚀</button>
+        <button class="btn copy-btn" onclick="copyCode(this)">Нусха</button>
+    </div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+    <script>
+        function filterSelection(c, btn) {
+            var x, i;
+            x = document.getElementsByClassName("filter-item");
+            var btns = document.getElementsByClassName("filter-btn");
+            for (i = 0; i < btns.length; i++) {
+                btns[i].classList.remove("active");
+            }
+            btn.classList.add("active");
+
+            for (i = 0; i < x.length; i++) {
+                if (c === "all") {
+                    x[i].style.display = "block";
+                } else if (x[i].classList.contains(c)) {
+                    x[i].style.display = "block";
+                } else {
+                    x[i].style.display = "none";
+                }
+            }
         }
-    }
 
-    // TARIX FUNKSIYASI
-    function addHistory(original, translated) {
-        const historySidebar = document.querySelector('.history-sidebar');
-        const newItem = document.createElement('div');
-        newItem.className = 'history-item';
-        newItem.innerText = `${original} -> ${translated}`;
-        historySidebar.prepend(newItem);
-    }
-
-    function speak(textId, langId, btn) {
-        btn.innerText = "Хонда истодааст...";
-        window.speechSynthesis.cancel();
-        const text = document.getElementById(textId).value;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = document.getElementById(langId).value;
-        utterance.onend = () => btn.innerText = "🔊 Шунидан";
-        window.speechSynthesis.speak(utterance);
-    }
-
-    function listen(textId, langId, btn) {
-        btn.style.background = "#f87171";
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        rec.lang = document.getElementById(langId).value;
-        rec.onresult = (e) => {
-            document.getElementById(textId).value = e.results[0][0].transcript;
-            btn.style.background = "#eb0000";
-        };
-        rec.start();
-    }
-
-    async function translateText(btn) {
-        const text1 = document.getElementById('text1').value;
-        if (!text1) return;
-        btn.innerText = "Тарҷума шуда истодааст...";
-        const from = document.getElementById('lang1').value.split('-')[0];
-        const to = document.getElementById('lang2').value.split('-')[0];
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text1)}&langpair=${from}|${to}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const translatedText = data.responseData.translatedText;
-        document.getElementById('text2').value = translatedText;
-        addHistory(text1, translatedText);
-        btn.innerText = "Тарҷума кардан ⇄";
-    }
-
-    const translations = {
-        tg: { title: "Тарҷумон", history: "Таърих", placeholder1: "Матнро дохил кунед...", placeholder2: "Тарҷума...", btnSpeak: "🔊 Шунидан", btnMic: "🎤 Микрофон", btnTranslate: "Тарҷума кардан ⇄", btnImg: "🖼️ Расм" },
-        uz: { title: "Tarjimon", history: "Tarix", placeholder1: "Matnni kiriting...", placeholder2: "Tarjima...", btnSpeak: "🔊 Eshitish", btnMic: "🎤 Mikrofon", btnTranslate: "Tarjima qilish ⇄", btnImg: "🖼️ Rasm" },
-        ru: { title: "Переводчик", history: "История", placeholder1: "Введите текст...", placeholder2: "Перевод...", btnSpeak: "🔊 Слушать", btnMic: "🎤 Микрофон", btnTranslate: "Перевести ⇄", btnImg: "🖼️ Фото" },
-        en: { title: "Translator", history: "History", placeholder1: "Enter text...", placeholder2: "Translation...", btnSpeak: "🔊 Listen", btnMic: "🎤 Microphone", btnTranslate: "Translate ⇄", btnImg: "🖼️ Image" }
-    };
-
-    function changeInterfaceLang() {
-        const lang = document.getElementById('interfaceLang').value;
-        const t = translations[lang];
-        document.querySelector('h2').innerText = t.title;
-        document.querySelector('.history-sidebar h4').innerText = t.history;
-        document.getElementById('text1').placeholder = t.placeholder1;
-        document.getElementById('text2').placeholder = t.placeholder2;
-        document.querySelectorAll('.speak-btn').forEach(btn => btn.innerText = t.btnSpeak);
-        document.querySelector('.mic-btn').innerText = t.btnMic;
-        document.querySelector('.img-btn').innerText = t.btnImg;
-        document.querySelector('.translate-btn').innerText = t.btnTranslate;
-    }
-</script>
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const code = button.previousElementSibling.innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const oldText = button.innerText;
+                    button.innerText = "Нусхабардорӣ шуд! ✅";
+                    button.style.background = "#10b981";
+                    setTimeout(() => {
+                        button.innerText = oldText;
+                        button.style.background = "#334155";
+                    }, 1200);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
